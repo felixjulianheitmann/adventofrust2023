@@ -1,6 +1,11 @@
 pub mod util;
 
-fn is_game_impossible(game: &str, limits: &[i32]) -> bool {
+use std::cmp::max;
+
+fn game_power(game: &str) -> i32 {
+    let mut r_min = 0;
+    let mut g_min = 0;
+    let mut b_min = 0;
 
     for draw in game.split("; ") {
         for set in draw.split(", ") {
@@ -12,18 +17,16 @@ fn is_game_impossible(game: &str, limits: &[i32]) -> bool {
                 .unwrap();
             let color = n_color.next().unwrap();
             match color {
-                "red" => if n > limits[0] { return true } else { () } ,
-                "green" => if n > limits[1] { return true } else { () },
-                "blue" => if n > limits[2] { return true } else { () },
+                "red" => r_min = max(r_min, n),
+                "green" => g_min = max(g_min, n),
+                "blue" => b_min = max(b_min, n),
                 _ => ()
             };
         }
     }
     
-    false
+    r_min * g_min * b_min
 }
-
-static LIMITS: &[i32] = &[12, 13, 14];
 
 fn main() {
     let input = util::read_input();
@@ -36,13 +39,9 @@ fn main() {
             Some(v) => v,
             None => { println!("What?"); 0 },
         };
-        let game_id = game[5..split_pos]
-            .parse::<i32>()
-            .unwrap();
-        if !is_game_impossible(&game[split_pos+2..], LIMITS) {
-            sum += game_id;
-            println!("game id: {}", game_id);
-        }
+        
+        let power = game_power(&game[split_pos+2..]);
+        sum += power;
     }
 
     util::write_output(sum);
